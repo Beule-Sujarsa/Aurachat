@@ -25,10 +25,17 @@ const Login = () => {
     try {
       const response = await loginUser(formData);
       console.log('Login successful:', response);
+      alert('Login successful!');
       // Handle successful login (redirect, store token, etc.)
     } catch (error) {
-      setError('Invalid email or password');
       console.error('Login error:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
+      } else if (error.message === 'Network Error') {
+        setError('Cannot connect to server. Please check if the backend is running.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

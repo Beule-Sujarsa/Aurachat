@@ -40,9 +40,21 @@ const Register = () => {
       });
       console.log('Registration successful:', response);
       // Handle successful registration (redirect to login, etc.)
+      alert('Registration successful! Please login.');
     } catch (error) {
-      setError('Registration failed. Please try again.');
       console.error('Registration error:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        const errorMsg = error.response.data.error;
+        if (errorMsg.includes('already exists')) {
+          setError(`${errorMsg}. Please try a different ${errorMsg.includes('Username') ? 'username' : 'email'}.`);
+        } else {
+          setError(errorMsg);
+        }
+      } else if (error.message === 'Network Error') {
+        setError('Cannot connect to server. Please check if the backend is running.');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

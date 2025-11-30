@@ -26,16 +26,26 @@ api.interceptors.request.use(
 
 // Auth API calls
 export const loginUser = async (credentials) => {
-  const response = await api.post('/auth/login', credentials);
-  if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token);
+  try {
+    const response = await api.post('/auth/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('authToken', response.data.token);
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Login API Error:', error);
+    throw error;
   }
-  return response.data;
 };
 
 export const registerUser = async (userData) => {
-  const response = await api.post('/auth/register', userData);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Register API Error:', error);
+    throw error;
+  }
 };
 
 export const logoutUser = () => {
@@ -44,13 +54,23 @@ export const logoutUser = () => {
 
 // Posts API calls
 export const getPosts = async () => {
-  const response = await api.get('/posts');
-  return response.data;
+  try {
+    const response = await api.get('/posts');
+    return response.data.posts || response.data || [];
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
 };
 
 export const createPost = async (postData) => {
-  const response = await api.post('/posts', postData);
-  return response.data;
+  try {
+    const response = await api.post('/posts', postData);
+    return response.data.post || response.data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
 };
 
 export const likePost = async (postId) => {

@@ -9,11 +9,13 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     try:
         data = request.get_json()
+        print(f"Registration data received: {data}")  # Debug log
         
         # Validate required fields
         required_fields = ['username', 'email', 'password', 'full_name']
         for field in required_fields:
-            if not data.get(field):
+            if not data or not data.get(field):
+                print(f"Missing field: {field}")  # Debug log
                 return jsonify({'error': f'{field} is required'}), 400
         
         # Check if user already exists
