@@ -66,33 +66,3 @@ CREATE TABLE IF NOT EXISTS followers (
     INDEX idx_follower (follower_id),
     INDEX idx_followed (followed_id)
 );
-
--- Insert sample data
-INSERT INTO user (username, email, password_hash, full_name, bio) VALUES
-('john_doe', 'john@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewYWoB/4EafqRvqS', 'John Doe', 'Welcome to my profile! Love to share thoughts and connect with people.'),
-('jane_smith', 'jane@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewYWoB/4EafqRvqS', 'Jane Smith', 'Tech enthusiast and coffee lover ☕');
-
--- Sample posts
-INSERT INTO post (content, user_id) VALUES
-('Welcome to AuraChat! Excited to be part of this amazing community. 🎉', 1),
-('Just finished reading an amazing book about technology and its impact on society. Highly recommend it!', 2),
-('Beautiful sunset today! Sometimes we need to pause and appreciate the little things in life. 🌅', 1),
-('Working on a new project. The journey of learning never stops! #coding #development', 2);
-
--- Sample follows
-INSERT INTO followers (follower_id, followed_id) VALUES
-(1, 2),
-(2, 1);
-
--- Sample likes
-INSERT INTO `like` (user_id, post_id) VALUES
-(1, 2),
-(1, 4),
-(2, 1),
-(2, 3);
-
--- Sample comments
-INSERT INTO comment (content, user_id, post_id) VALUES
-('Welcome to the community! Great to have you here.', 2, 1),
-('Thanks for the book recommendation! I will definitely check it out.', 1, 2),
-('Amazing photo! Where was this taken?', 2, 3);
