@@ -193,9 +193,9 @@ const Dashboard = () => {
               Start conversations, join rooms, and connect with other users.
             </p>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" disabled>
-                Start Chat (Coming Soon)
-              </button>
+              <Link to="/messages" className="btn btn-primary">
+                Start Chat
+              </Link>
               <button className="btn btn-outline" disabled>
                 Join Room (Coming Soon)
               </button>

@@ -104,4 +104,15 @@ export const apiService = {
   }
 };
 
+// Search users for messaging / discovery
+export async function searchUsers(query) {
+  try {
+    const response = await api.get(`/users/search?q=${encodeURIComponent(query)}`);
+    return response.data.users || response.data || [];
+  } catch (error) {
+    console.error('Search API Error:', error);
+    throw error;
+  }
+}
+
 export default api;
