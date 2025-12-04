@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app import db
-from app.models import User, UserProfile
+from app.models import User
 import re
 
 auth_bp = Blueprint('auth', __name__)
@@ -45,21 +45,13 @@ def register():
         # Create new user
         user = User(
             username=data['username'],
-            email=data['email']
+            email=data['email'],
+            bio=data.get('bio', ''),
+            theme=data.get('theme', 'light')
         )
         user.set_password(data['password'])
         
         db.session.add(user)
-        db.session.flush()  # Get user ID
-        
-        # Create default profile
-        profile = UserProfile(
-            user_id=user.id,
-            full_name=data.get('full_name', ''),
-            theme_preference='light'  # Default theme
-        )
-        
-        db.session.add(profile)
         db.session.commit()
         
         # Create access token
@@ -91,12 +83,6 @@ def login():
         user = User.query.filter_by(username=data['username']).first()
         
         if user and user.check_password(data['password']):
-            if not user.is_active:
-                return jsonify({'message': 'Account is deactivated'}), 403
-                
-            # Update last seen
-            user.update_last_seen()
-            
             # Create access token
             access_token = create_access_token(identity=user.id)
             
@@ -122,9 +108,6 @@ def get_current_user():
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
-        
-        if not user.is_active:
-            return jsonify({'error': 'Account is deactivated'}), 403
         
         return jsonify({'user': user.to_dict()}), 200
         

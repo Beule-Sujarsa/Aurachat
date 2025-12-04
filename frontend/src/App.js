@@ -7,7 +7,8 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
+import Profile from './pages/ProfileNew';
+import Feed from './pages/Feed';
 import './index.css';
 
 function App() {
@@ -24,9 +25,9 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 
                 {/* Protected routes */}
-                <Route path="/dashboard" element={
+                <Route path="/feed" element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <Feed />
                   </ProtectedRoute>
                 } />
                 <Route path="/profile" element={
@@ -34,9 +35,19 @@ function App() {
                     <Profile />
                   </ProtectedRoute>
                 } />
+                <Route path="/profile/:username" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/" element={<Navigate to="/feed" replace />} />
                 
                 {/* 404 fallback */}
                 <Route path="*" element={

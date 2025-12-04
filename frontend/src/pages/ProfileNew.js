@@ -79,6 +79,7 @@ const Profile = () => {
     
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
   if (isLoading) {
@@ -354,38 +355,6 @@ const Profile = () => {
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default Profile;
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="text-center">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isSaving}
-                style={{
-                  minWidth: '200px',
-                  padding: '12px 2rem'
-                }}
-              >
-                {isSaving ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div className="loading-spinner"></div>
-                    Saving...
-                  </div>
-                ) : (
-                  'Save Changes'
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
       </div>
     </div>
   );

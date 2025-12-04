@@ -49,14 +49,16 @@ def create_app(config_class=Config):
         return jsonify({'error': 'Authorization token is required', 'message': 'Please login to access this resource'}), 401
     
     # Import models first to register them
-    from app.models import User, UserProfile
+    from app.models import User, Post, Like, Comment, Follow
     
     # Register blueprints
     from app.routes.auth import auth_bp
-    from app.routes.profile import profile_bp
+    from app.routes.users import users_bp
+    from app.routes.posts_new import posts_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api')
-    app.register_blueprint(profile_bp, url_prefix='/api')
+    app.register_blueprint(users_bp, url_prefix='/api')
+    app.register_blueprint(posts_bp, url_prefix='/api')
     
     # Create tables
     with app.app_context():

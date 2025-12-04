@@ -85,7 +85,7 @@ const Navbar = () => {
                   gap: '1rem'
                 }}>
                   <Link 
-                    to="/dashboard" 
+                    to="/feed" 
                     className="nav-link"
                     style={{
                       color: 'var(--text-primary)',
@@ -94,7 +94,7 @@ const Navbar = () => {
                       transition: 'all var(--transition-fast)'
                     }}
                   >
-                    Dashboard
+                    📱 Feed
                   </Link>
                   <Link 
                     to="/profile" 
@@ -106,7 +106,7 @@ const Navbar = () => {
                       transition: 'all var(--transition-fast)'
                     }}
                   >
-                    Profile
+                    👤 Profile
                   </Link>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     Welcome, {user.username}
@@ -165,7 +165,7 @@ const Navbar = () => {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <Link 
-                to="/dashboard" 
+                to="/feed" 
                 onClick={() => setIsMenuOpen(false)}
                 style={{
                   color: 'var(--text-primary)',
@@ -174,7 +174,7 @@ const Navbar = () => {
                   textAlign: 'center'
                 }}
               >
-                Dashboard
+                📱 Feed
               </Link>
               <Link 
                 to="/profile" 
@@ -186,7 +186,7 @@ const Navbar = () => {
                   textAlign: 'center'
                 }}
               >
-                Profile
+                👤 Profile
               </Link>
               <div style={{
                 padding: '12px',
