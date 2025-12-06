@@ -1,9 +1,21 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
+from flask import Blueprint, request, jsonify, session
+from functools import wraps
 from app import db
 from app.models import Post, User, Like, Comment
 
 posts_bp = Blueprint('posts', __name__)
+
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Login required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user_id():
+    return session.get('user_id')
 
 @posts_bp.route('/', methods=['GET'])
 def get_posts():
@@ -16,14 +28,10 @@ def get_posts():
         )
         
         current_user = None
-        # Try to get current user if token is provided (optional)
-        try:
-            verify_jwt_in_request(optional=True)
-            user_id = get_jwt_identity()
-            if user_id:
-                current_user = User.query.get(user_id)
-        except:
-            pass
+        # Get current user from session if logged in
+        user_id = get_current_user_id()
+        if user_id:
+            current_user = User.query.get(user_id)
         
         return jsonify({
             'posts': [post.to_dict(current_user) for post in posts.items],
@@ -37,10 +45,10 @@ def get_posts():
 
 
 @posts_bp.route('/', methods=['POST'])
-@jwt_required()
+@login_required
 def create_post():
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         data = request.get_json()
         
         if not data.get('content'):
@@ -81,10 +89,10 @@ def get_post(post_id):
 
 
 @posts_bp.route('/<int:post_id>/like', methods=['POST'])
-@jwt_required()
+@login_required
 def like_post(post_id):
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         post = Post.query.get_or_404(post_id)
         
         # Check if already liked
@@ -128,10 +136,10 @@ def get_comments(post_id):
 
 
 @posts_bp.route('/<int:post_id>/comments', methods=['POST'])
-@jwt_required()
+@login_required
 def create_comment(post_id):
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         data = request.get_json()
         
         if not data.get('content'):

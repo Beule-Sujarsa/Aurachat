@@ -14,7 +14,8 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    profile_pic = db.Column(db.String(200), default='default.jpg')
+    # profile_pic can hold a URL/path or base64 data-URI
+    profile_pic = db.Column(db.Text, default='default.jpg')
     bio = db.Column(db.Text)
     is_private = db.Column(db.Boolean, default=False)
     theme = db.Column(db.String(20), default='light')

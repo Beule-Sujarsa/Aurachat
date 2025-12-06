@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS user (
     email VARCHAR(120) NOT NULL UNIQUE,
     username VARCHAR(80) NOT NULL UNIQUE,
     password_hash VARCHAR(255),
-    profile_pic VARCHAR(200) DEFAULT 'default.jpg',
+    profile_pic LONGTEXT DEFAULT 'default.jpg',
     bio TEXT,
     is_private BOOLEAN DEFAULT FALSE,
     theme VARCHAR(20) DEFAULT 'light',
@@ -55,6 +55,17 @@ CREATE TABLE IF NOT EXISTS comment (
     FOREIGN KEY (post_id) REFERENCES post(id) ON DELETE CASCADE,
     INDEX idx_post_id (post_id),
     INDEX idx_user_id (user_id)
+) ENGINE=InnoDB;
+
+-- Create followers association table (self-referential many-to-many)
+CREATE TABLE IF NOT EXISTS followers (
+    follower_id INT NOT NULL,
+    followed_id INT NOT NULL,
+    PRIMARY KEY (follower_id, followed_id),
+    FOREIGN KEY (follower_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (followed_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_follower (follower_id),
+    INDEX idx_followed (followed_id)
 ) ENGINE=InnoDB;
 
 -- Create follow table for future use

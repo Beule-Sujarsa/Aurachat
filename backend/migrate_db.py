@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app, db
 from app.models import User
+from sqlalchemy import text
 
 def update_schema():
     """Update database schema with any new columns"""
@@ -28,24 +29,39 @@ def update_schema():
             # Add any missing columns
             if 'bio' not in columns:
                 print("Adding bio column...")
-                db.engine.execute('ALTER TABLE user ADD COLUMN bio TEXT')
+                db.session.execute(text('ALTER TABLE user ADD COLUMN bio TEXT'))
+                db.session.commit()
             
             if 'profile_pic' not in columns:
-                print("Adding profile_pic column...")
-                db.engine.execute("ALTER TABLE user ADD COLUMN profile_pic VARCHAR(200) DEFAULT 'default.jpg'")
+                print("Adding profile_pic column as LONGTEXT...")
+                db.session.execute(text("ALTER TABLE user ADD COLUMN profile_pic LONGTEXT DEFAULT 'default.jpg'"))
+                db.session.commit()
+            else:
+                # Ensure profile_pic column can hold large base64/data URIs
+                try:
+                    print("Ensuring profile_pic column is LONGTEXT to store large data...")
+                    db.session.execute(text("ALTER TABLE user MODIFY COLUMN profile_pic LONGTEXT"))
+                    db.session.commit()
+                except Exception as e:
+                    print(f"Note: {e}")
+                    # If MODIFY fails, continue — column may already be LONGTEXT or DB may not support modify
+                    pass
             
             if 'is_private' not in columns:
                 print("Adding is_private column...")
-                db.engine.execute('ALTER TABLE user ADD COLUMN is_private BOOLEAN DEFAULT FALSE')
+                db.session.execute(text('ALTER TABLE user ADD COLUMN is_private BOOLEAN DEFAULT FALSE'))
+                db.session.commit()
             
             if 'theme' not in columns:
                 print("Adding theme column...")
-                db.engine.execute("ALTER TABLE user ADD COLUMN theme VARCHAR(20) DEFAULT 'light'")
+                db.session.execute(text("ALTER TABLE user ADD COLUMN theme VARCHAR(20) DEFAULT 'light'"))
+                db.session.commit()
                 
             print("Database schema updated successfully!")
             
         except Exception as e:
             print(f"Error updating schema: {e}")
+            db.session.rollback()
             return False
         
         print("Migration completed successfully!")

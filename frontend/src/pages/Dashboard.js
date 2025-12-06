@@ -40,7 +40,7 @@ const Dashboard = () => {
     
     const fields = ['bio', 'location', 'website', 'birth_date'];
     const completedFields = fields.filter(field => profile[field] && profile[field].trim() !== '').length;
-    const avatarBonus = profile.avatar_data ? 1 : 0;
+    const avatarBonus = (profile.profile_pic && profile.profile_pic !== 'default.jpg') ? 1 : 0;
     
     return Math.round(((completedFields + avatarBonus) / (fields.length + 1)) * 100);
   };
@@ -246,8 +246,8 @@ const Dashboard = () => {
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    background: (profile.avatar_data && profile.avatar_mimetype) ? 
-                      `url(data:${profile.avatar_mimetype};base64,${profile.avatar_data}) center/cover` : 
+                    background: (profile.profile_pic && profile.profile_pic !== 'default.jpg') ? 
+                      `url(${profile.profile_pic}) center/cover` : 
                       'var(--primary-gradient)',
                     display: 'flex',
                     alignItems: 'center',
@@ -257,10 +257,10 @@ const Dashboard = () => {
                     fontWeight: 'bold',
                     marginBottom: '0.5rem'
                   }}>
-                    {!(profile.avatar_data && profile.avatar_mimetype) && (user?.username?.charAt(0).toUpperCase() || 'U')}
+                    {!(profile.profile_pic && profile.profile_pic !== 'default.jpg') && (user?.username?.charAt(0).toUpperCase() || 'U')}
                   </div>
                   <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    {(profile.avatar_data && profile.avatar_mimetype) ? 'Custom Avatar' : 'Default Avatar'}
+                    {(profile.profile_pic && profile.profile_pic !== 'default.jpg') ? 'Custom Avatar' : 'Default Avatar'}
                   </div>
                 </div>
 

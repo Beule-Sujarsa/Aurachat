@@ -267,8 +267,11 @@ const ProfileEdit = () => {
         privacy_settings: profile.privacy_settings
       };
 
-      // Include avatar URL if changed
-      if (avatarPreview) {
+      // Avatar handling: for real users, upload file (if present) and use returned URL;
+      // otherwise for demo users we keep the base64 preview stored locally.
+      if (avatarFile && !user.isDemo) {
+        // we'll upload the file first and get a URL
+      } else if (avatarPreview) {
         submitData.profile_pic = avatarPreview;
       }
 
@@ -292,14 +295,42 @@ const ProfileEdit = () => {
         setAvatarFile(null);
       } else {
         // Send to backend for real users
+        // If there's an avatar file, upload it first as multipart/form-data
+        if (avatarFile && !user.isDemo) {
+          try {
+            const formData = new FormData();
+            formData.append('avatar', avatarFile);
+
+            const uploadResp = await api.post('/profile/avatar', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+            // server returns { profile_pic: '/api/profile/avatar/<user_id>' }
+            const uploadedUrl = uploadResp.data.profile_pic;
+            submitData.profile_pic = uploadedUrl;
+            // also update preview to the uploaded URL
+            setAvatarPreview(uploadedUrl);
+          } catch (uploadErr) {
+            // Log full response body if available to help debugging
+            console.error('Avatar upload error:', uploadErr, uploadErr.response?.data);
+            const respData = uploadErr.response?.data;
+            // Prefer structured errors returned by server
+            const uploadMsg = respData?.error || respData?.db_error || respData?.disk_error || 'Failed to upload avatar.';
+            showMessage(uploadMsg, 'error');
+            setIsSaving(false);
+            return;
+          }
+        }
+
         const response = await api.put('/profile/comprehensive', submitData);
-        
+
         // Update local user context with new data
         updateUser({
           ...user,
           email: profile.email,
           bio: profile.bio,
-          profile_pic: avatarPreview || 'default.jpg',
+          profile_pic: submitData.profile_pic || avatarPreview || 'default.jpg',
           theme: profile.theme_preference
         });
 
@@ -308,9 +339,10 @@ const ProfileEdit = () => {
       }
       
     } catch (err) {
-      console.error('Profile update error:', err);
+      console.error('Profile update error:', err, err.response?.data);
       
-      const errorMessage = err.response?.data?.error || 'Failed to update profile. Please try again.';
+      const resp = err.response?.data;
+      const errorMessage = resp?.error || resp?.db_error || resp?.disk_error || 'Failed to update profile. Please try again.';
       showMessage(errorMessage, 'error');
     } finally {
       setIsSaving(false);

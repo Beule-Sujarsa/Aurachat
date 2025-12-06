@@ -1,8 +1,11 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from functools import wraps
 from app import db
 from app.models import User
 from datetime import datetime
+import os
+import time
+from werkzeug.utils import secure_filename
 
 profile_bp = Blueprint('profile', __name__)
 
@@ -225,5 +228,86 @@ def get_detailed_profile():
         
         return jsonify(user.to_dict()), 200
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@profile_bp.route('/profile/avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    """Upload avatar image file and store as base64 data-URI in profile_pic column."""
+    import traceback
+    try:
+        user_id = get_current_user_id()
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        if 'avatar' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['avatar']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Validate mime type
+        allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
+        if file.mimetype not in allowed:
+            return jsonify({'error': 'Unsupported file type'}), 400
+        
+        # Read binary data
+        data = file.read()
+
+        # Enforce size limit (5MB)
+        max_bytes = 5 * 1024 * 1024
+        if len(data) > max_bytes:
+            return jsonify({'error': 'File too large (max 5MB)'}), 400
+
+        # Store the image as a base64 data-URI in the profile_pic column
+        import base64
+        b64 = base64.b64encode(data).decode('ascii')
+        data_uri = f"data:{file.mimetype};base64,{b64}"
+
+        # Before overwriting, if previous profile_pic pointed to a local static file, remove it
+        try:
+            old_pic = (user.profile_pic or '')
+            if old_pic.startswith('/static/uploads/avatars/'):
+                upload_root = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+                old_filename = os.path.basename(old_pic)
+                old_path = os.path.join(current_app.root_path, upload_root, 'avatars', old_filename)
+                if os.path.exists(old_path):
+                    try:
+                        os.remove(old_path)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # Save new data-uri into profile_pic
+        user.profile_pic = data_uri
+        db.session.commit()
+
+        return jsonify({'message': 'Avatar uploaded successfully', 'profile_pic': data_uri}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Avatar upload error: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({'error': f'Avatar upload failed: {str(e)}'}), 500
+
+
+
+@profile_bp.route('/profile/avatar/<int:user_id>', methods=['GET'])
+def serve_avatar(user_id):
+    """Serve avatar - returns profile_pic URL/data-URI"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        if user.profile_pic:
+            return jsonify({'profile_pic': user.profile_pic}), 200
+
+        return jsonify({'error': 'No avatar stored'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
