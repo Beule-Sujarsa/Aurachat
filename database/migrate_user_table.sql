@@ -1,0 +1,5 @@
+-- Add missing columns to user table if they don't exist
+ALTER TABLE user ADD COLUMN IF NOT EXISTS profile_pic LONGTEXT DEFAULT 'default.jpg';
+ALTER TABLE user ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE user ADD COLUMN IF NOT EXISTS is_private BOOLEAN DEFAULT FALSE;
+ALTER TABLE user ADD COLUMN IF NOT EXISTS theme VARCHAR(20) DEFAULT 'light';
