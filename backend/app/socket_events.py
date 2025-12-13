@@ -35,13 +35,21 @@ def handle_call_user(data):
     call_type = data.get('callType')
     caller = data.get('caller')
     
+    print(f'=== CALL REQUEST ===')
+    print(f'Caller: {caller}')
+    print(f'Target User ID: {target_user_id}')
+    print(f'Call Type: {call_type}')
+    print(f'Connected users: {connected_users}')
+    
     if target_user_id in connected_users:
         target_sid = connected_users[target_user_id]
         emit('incoming_call', {
             'caller': caller,
             'callType': call_type
         }, room=target_sid)
-        print(f'{caller["username"]} calling {target_user_id}')
+        print(f'✓ Incoming call event sent to {target_user_id} at socket {target_sid}')
+    else:
+        print(f'✗ Target user {target_user_id} not found in connected users')
 
 @socketio.on('call_accepted')
 def handle_call_accepted(data):
@@ -75,23 +83,38 @@ def handle_webrtc_offer(data):
     target_user_id = data.get('target')
     offer = data.get('offer')
     
+    print(f'=== WEBRTC OFFER ===')
+    print(f'From: {request.sid}')
+    print(f'To User ID: {target_user_id}')
+    print(f'Connected users: {connected_users}')
+    
     if target_user_id in connected_users:
         target_sid = connected_users[target_user_id]
         emit('webrtc_offer', {
             'offer': offer,
             'caller': request.sid
         }, room=target_sid)
+        print(f'✓ Offer forwarded to socket {target_sid}')
+    else:
+        print(f'✗ Target user {target_user_id} not connected')
 
 @socketio.on('webrtc_answer')
 def handle_webrtc_answer(data):
     target_user_id = data.get('target')
     answer = data.get('answer')
     
+    print(f'=== WEBRTC ANSWER ===')
+    print(f'From: {request.sid}')
+    print(f'To User ID: {target_user_id}')
+    
     if target_user_id in connected_users:
         target_sid = connected_users[target_user_id]
         emit('webrtc_answer', {
             'answer': answer
         }, room=target_sid)
+        print(f'✓ Answer forwarded to socket {target_sid}')
+    else:
+        print(f'✗ Target user {target_user_id} not connected')
 
 @socketio.on('ice_candidate')
 def handle_ice_candidate(data):
